@@ -79,7 +79,7 @@ void TimeSet(DateTime_t *tm) {
   i2c_master_write_byte(cmd, dec2bcd(tm->Month), true);
   i2c_master_write_byte(cmd, dec2bcd(CalendarYrToTm(tm->Year)), true);
   i2c_master_stop(cmd);
-  if (i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000 / portTICK_PERIOD_MS) == ESP_OK)
+  i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000 / portTICK_PERIOD_MS);
   i2c_cmd_link_delete(cmd);
 
   cmd = i2c_cmd_link_create();
@@ -88,7 +88,7 @@ void TimeSet(DateTime_t *tm) {
   i2c_master_write_byte(cmd, TIME_REG, true);
   i2c_master_write_byte(cmd, dec2bcd(tm->Second) | (1 << ST), true); // start the oscillator (Bit 7, ST == 1)
   i2c_master_stop(cmd);
-  if (i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000 / portTICK_PERIOD_MS) == ESP_OK)
+  i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000 / portTICK_PERIOD_MS);
   i2c_cmd_link_delete(cmd);
 }
 

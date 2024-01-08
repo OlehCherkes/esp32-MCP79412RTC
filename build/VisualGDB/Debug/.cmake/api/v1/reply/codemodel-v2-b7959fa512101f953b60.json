@@ -1545,7 +1545,7 @@
 				{
 					"directoryIndex" : 12,
 					"id" : "__idf_esp_app_format::@08c2bdce7fd85cdbea06",
-					"jsonFile" : "target-__idf_esp_app_format-DEBUG-17ee399e79629bca9f51.json",
+					"jsonFile" : "target-__idf_esp_app_format-DEBUG-0bb3d1d09f38dd9446c5.json",
 					"name" : "__idf_esp_app_format",
 					"projectIndex" : 1
 				},
@@ -1699,7 +1699,7 @@
 				{
 					"directoryIndex" : 70,
 					"id" : "__idf_fatfs::@75ac1d9b25dacc8cc9e7",
-					"jsonFile" : "target-__idf_fatfs-DEBUG-7ad402730fd711f5093f.json",
+					"jsonFile" : "target-__idf_fatfs-DEBUG-2a1674c5780b804f4425.json",
 					"name" : "__idf_fatfs",
 					"projectIndex" : 1
 				},
@@ -1755,7 +1755,7 @@
 				{
 					"directoryIndex" : 81,
 					"id" : "__idf_main::@7368607ed66887415643",
-					"jsonFile" : "target-__idf_main-DEBUG-737d5ce15fb2df70d645.json",
+					"jsonFile" : "target-__idf_main-DEBUG-6cb38087f90e9bda9393.json",
 					"name" : "__idf_main",
 					"projectIndex" : 1
 				},
@@ -1902,7 +1902,7 @@
 				{
 					"directoryIndex" : 21,
 					"id" : "__ldgen_output_sections.ld::@874df54e61e20112dfd4",
-					"jsonFile" : "target-__ldgen_output_sections.ld-DEBUG-f2087d63288cafe71c3a.json",
+					"jsonFile" : "target-__ldgen_output_sections.ld-DEBUG-a0237f296dd741fb7f32.json",
 					"name" : "__ldgen_output_sections.ld",
 					"projectIndex" : 1
 				},
@@ -2042,7 +2042,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "flash::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-flash-DEBUG-45dc1221504d7a95ce14.json",
+					"jsonFile" : "target-flash-DEBUG-235f1efcedf0ac5f4e48.json",
 					"name" : "flash",
 					"projectIndex" : 0
 				},
@@ -2056,7 +2056,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "i2s_std_example.elf::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-i2s_std_example.elf-DEBUG-a189fcd0ba0fbf40a376.json",
+					"jsonFile" : "target-i2s_std_example.elf-DEBUG-ca095707cff6890af9ef.json",
 					"name" : "i2s_std_example.elf",
 					"projectIndex" : 0
 				},
@@ -2189,7 +2189,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "uf2::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-uf2-DEBUG-21a6f2b14e671c0b5c9a.json",
+					"jsonFile" : "target-uf2-DEBUG-b3c40cc58bd3e64b0984.json",
 					"name" : "uf2",
 					"projectIndex" : 0
 				},
