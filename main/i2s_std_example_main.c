@@ -3,11 +3,11 @@
 #include <freertos/task.h>
 #include <driver/i2c.h>
 
-#define I2C_MASTER_SCL_IO    22    /*!< GPIO номер для SCL */
-#define I2C_MASTER_SDA_IO    23    /*!< GPIO номер для SDA */
-#define I2C_MASTER_NUM       I2C_NUM_0   /*!< I2C порт номер */
-#define I2C_SLAVE_ADDR       0x6F  /*!< Адрес устройства I2C slave */
-#define I2C_MASTER_FREQ_HZ   100000     /*!< Частота I2C мастера */
+#define I2C_MASTER_SCL_IO    22          // GPIO SCL
+#define I2C_MASTER_SDA_IO    23          // GPIO SDA
+#define I2C_MASTER_NUM       I2C_NUM_0   // I2C port
+#define I2C_SLAVE_ADDR       0x6F        // Slave address
+#define I2C_MASTER_FREQ_HZ   100000      // I2C master frequency
 
 #define TIME_REG 0x00
 #define ST 7        // Seconds register (TIME_REG) oscillator start/stop bit, 1==Start, 0==Stop
@@ -17,28 +17,38 @@
 #define VBAT 4      // Day register (TIME_REG+3) set by hardware when Vcc fails and RTC runs on battery.
 #define LP 5        // Month register (TIME_REG+5) leap year bit
 
-#define tmYearToCalendar(Y) ((Y) + 1970)  // full four digit year 
+#define tmYearToCalendar(Y) ((Y) + 1970)  // Full four digit year 
 #define CalendarYrToTm(Y) ((Y) - 1970)
 
-struct tmElements_t {
-  uint8_t Second; // секунды (0-59)
-  uint8_t Minute; // минуты (0-59)
-  uint8_t Hour; // часы (0-23)
-  uint8_t Wday; // день недели (0-6, 0 = воскресенье)
-  uint8_t Day; // день (1-31)
-  uint8_t Month; // месяц (1-12)
-  uint16_t Year; // год
-};
-
-struct tmElements_t tm, tm2 = {};
-
-uint8_t dec2bcd(uint8_t n)
+typedef struct
 {
+  uint8_t Second;
+  uint8_t Minute;
+  uint8_t Hour;
+  uint8_t Wday;
+  uint8_t Day;
+  uint8_t Month;
+  uint16_t Year;
+} DateTime_t;
+
+DateTime_t t, t2 = {};
+
+uint8_t dec2bcd(uint8_t n) {
   return n + 6 * (n / 10);
 }
 
 uint8_t bcd2dec(uint8_t n) {
   return n - 6 * (n >> 4);
+}
+
+void DataInit(DateTime_t *tm) {
+  tm->Second = 0;
+  tm->Minute = 2;
+  tm->Hour = 1;
+  tm->Wday = 1;
+  tm->Day = 3;
+  tm->Month = 4;
+  tm->Year = 2024;
 }
 
 static void i2c_init() {
@@ -55,11 +65,11 @@ static void i2c_init() {
   i2c_driver_install(I2C_NUM_0, conf.mode, 0, 0, 0);
 }
 
-void write_RTC(struct tmElements_t *tm) {
+void TimeSet(DateTime_t *tm) {
   i2c_cmd_handle_t cmd = i2c_cmd_link_create();
 
   i2c_master_start(cmd);
-  i2c_master_write_byte(cmd, (I2C_SLAVE_ADDR << 1)  /* | I2C_MASTER_WRITE */, true);
+  i2c_master_write_byte(cmd, (I2C_SLAVE_ADDR << 1) | I2C_MASTER_WRITE, true);
   i2c_master_write_byte(cmd, TIME_REG, true);
   i2c_master_write_byte(cmd, 0x00, true); // stops the oscillator (Bit 7, ST == 0)
   i2c_master_write_byte(cmd, dec2bcd(tm->Minute), true);
@@ -70,25 +80,23 @@ void write_RTC(struct tmElements_t *tm) {
   i2c_master_write_byte(cmd, dec2bcd(CalendarYrToTm(tm->Year)), true);
   i2c_master_stop(cmd);
   if (i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000 / portTICK_PERIOD_MS) == ESP_OK)
-    printf("Send data\n");
   i2c_cmd_link_delete(cmd);
 
   cmd = i2c_cmd_link_create();
   i2c_master_start(cmd);
-  i2c_master_write_byte(cmd, (I2C_SLAVE_ADDR << 1) /*| I2C_MASTER_WRITE */, true);
+  i2c_master_write_byte(cmd, (I2C_SLAVE_ADDR << 1) | I2C_MASTER_WRITE, true);
   i2c_master_write_byte(cmd, TIME_REG, true);
   i2c_master_write_byte(cmd, dec2bcd(tm->Second) | (1 << ST), true); // start the oscillator (Bit 7, ST == 1)
   i2c_master_stop(cmd);
   if (i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000 / portTICK_PERIOD_MS) == ESP_OK)
-    printf("Send data\n");
   i2c_cmd_link_delete(cmd);
 }
 
-void read_RTC(struct tmElements_t *tm) {
+void GetCurrentRtc(DateTime_t *tm) {
   i2c_cmd_handle_t cmd = i2c_cmd_link_create();
 
   i2c_master_start(cmd);
-  i2c_master_write_byte(cmd, (I2C_SLAVE_ADDR << 1) /* | I2C_MASTER_READ */, true);
+  i2c_master_write_byte(cmd, (I2C_SLAVE_ADDR << 1), true);
   i2c_master_write_byte(cmd, TIME_REG, true);
 
   i2c_master_start(cmd);
@@ -102,7 +110,7 @@ void read_RTC(struct tmElements_t *tm) {
   i2c_master_read_byte(cmd, &(tm->Wday), I2C_MASTER_ACK);
   i2c_master_read_byte(cmd, &(tm->Day), I2C_MASTER_ACK);
   i2c_master_read_byte(cmd, &(tm->Month), I2C_MASTER_ACK);
-  i2c_master_read_byte(cmd, &(tm->Year), I2C_MASTER_NACK);
+  i2c_master_read_byte(cmd, (uint8_t*)&(tm->Year), I2C_MASTER_NACK);
 
   i2c_master_stop(cmd);
   i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_PERIOD_MS);
@@ -120,22 +128,14 @@ void app_main()
 {
   i2c_init();
 
-//  tm.Second = 0;
-//  tm.Minute = 2;
-//  tm.Hour = 1;
-//  tm.Wday = 1;
-//  tm.Day = 3;
-//  tm.Month = 4;
-//  tm.Year = 2024;
-//  write_RTC(&tm);
+//  DataInit(&t);
+//  TimeSet(&t);
 
   for (;;)
   {
-    
-    read_RTC(&tm2);
+    GetCurrentRtc(&t2);
 
-    printf("%02u:%02u:%02u %02u/%02u/%04u %02u\n", tm2.Hour, tm2.Minute, tm2.Second, tm2.Day, tm2.Month, tm2.Year, tm2.Wday);
+    printf("%02u:%02u:%02u %02u/%02u/%04u %02u\n", t2.Hour, t2.Minute, t2.Second, t2.Day, t2.Month, t2.Year, t2.Wday);
     vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
-
 }
